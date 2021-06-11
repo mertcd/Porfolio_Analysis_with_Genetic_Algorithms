@@ -144,30 +144,36 @@ if __name__ == '__main__':
     stocknames = os.listdir("Stocks")
 
 
-    for i in range(20):
-        popu = createPopulation(stocknames, 5,20, "2017-04-24", dateList)
 
-        co = 0
+    popu = createPopulation(stocknames, 5,20, "2017-04-24", dateList)
 
+    co = 0
 
-        while co < 30:
-            co+=1
-            popu = sortPopulation(popu)
-            popu= popu[:20]
-            for i in range(20):
-                newBorn1 =crossOver(popu[-1],popu[-2])[0]
+    fitnessValues = []
+    proValues = []
+    while co < 30:
+        co+=1
+        popu = sortPopulation(popu)
+        popu= popu[:20]
+        fitnessValues.append(calculateFitness(popu[0]))
+        for i in range(20):
+            newBorn1 =crossOver(popu[-1],popu[-2])[0]
 
-                a = random.randint(0,10)
-                if a >5:
-                    newBorn1 = mutation(newBorn1, "2017-04-24", dateList)
+            a = random.randint(0,10)
+            if a >0:
+                newBorn1 = mutation(newBorn1, "2017-04-24", dateList)
                 popu.append(newBorn1)
-        profit =income(popu[0], "2017-04-24",20)
-        c+=profit
-        file.write(str(profit)+"\n"+str(popu[0])+"\n")
+        profit = income(popu[0], "2017-04-24", 20)
+        proValues.append(profit)
 
 
-    print(c)
-
+    file.write(str(profit)+"\n"+str(popu[0])+"\n")
+    print(fitnessValues)
+    steps = [i for i in range(len(fitnessValues))]
+    plt.plot(steps,fitnessValues)
+    plt.show()
+    plt.plot(steps,proValues)
+    plt.show()
 """    for i in range(len(popu)):
         print("%f" % calculateFitness(popu[i]))
 """
