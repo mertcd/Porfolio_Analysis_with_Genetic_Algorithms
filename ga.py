@@ -57,7 +57,7 @@ def setParameters(stck, end, dates):
     ma = stcWma[1]
     stc = stcWma[0]
     goldenCross = calculateGoldenCross(stockArr, ma, end, dates)
-    for i in range(20):
+
 
     return [stck, goldenCross, stc]
 
