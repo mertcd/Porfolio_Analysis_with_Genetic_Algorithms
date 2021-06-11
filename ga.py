@@ -167,7 +167,7 @@ if __name__ == '__main__':
         proValues.append(profit)
 
 
-    file.write(str(profit)+"\n"+str(popu[0])+"\n")
+
     print(fitnessValues)
     steps = [i for i in range(len(fitnessValues))]
     plt.plot(steps,fitnessValues)
