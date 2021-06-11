@@ -56,10 +56,12 @@ def setParameters(stck, end, dates):
     stcWma = stc_and_ma(stockArr, dates[dates.index(end) - 30], end)
     ma = stcWma[1]
     stc = stcWma[0]
+    closingPrice = stockArr[dateList.index("2017-03-24")].split(",")[1]
+    monthBeforePrice= stockArr[dateList.index("2017-03-24")-24].split(",")[1]
     goldenCross = calculateGoldenCross(stockArr, ma, end, dates)
 
 
-    return [stck, goldenCross, stc]
+    return [stck, goldenCross, stc,float(closingPrice)-float(monthBeforePrice)]
 
 
 def createPortfolio(stcks, length, end, dates):
@@ -82,11 +84,13 @@ def createPopulation(stcks, portLength, length, end, dates):
 def calculateFitness(genome):
     maSum = 0
     stcSum = 0
+    momentum = 0
     for gen in genome:
         maSum += gen[1]
         stcSum += gen[2]
-    return  -maSum
-    #- (stcSum+ maSum/ 10)
+        momentum+=gen[3]
+    return  (stcSum/200+ maSum/ 5-momentum*10)*-1
+
 def crossOver(gen1 ,gen2):
     ch1 = gen1.copy()
     ch2 = gen2.copy()
@@ -135,16 +139,18 @@ if __name__ == '__main__':
     stc = open("Stocks\\abax.txt", "r")
     sta = makeList(stc)
     dateList = makeDates(sta)
-
-    a = 0
+    file =open("income.txt","w")
+    c = 0
     stocknames = os.listdir("Stocks")
-    for i in range(10):
-        popu = createPopulation(stocknames, 5, 20, "2017-03-24", dateList)
+
+
+    for i in range(20):
+        popu = createPopulation(stocknames, 5,20, "2017-04-24", dateList)
 
         co = 0
 
 
-        while co < 200:
+        while co < 30:
             co+=1
             popu = sortPopulation(popu)
             popu= popu[:20]
@@ -153,12 +159,14 @@ if __name__ == '__main__':
 
                 a = random.randint(0,10)
                 if a >5:
-                    newBorn1 = mutation(newBorn1, "2017-03-24", dateList)
+                    newBorn1 = mutation(newBorn1, "2017-04-24", dateList)
                 popu.append(newBorn1)
-        a+=income(popu[-1], "2017-03-24",20)
+        profit =income(popu[0], "2017-04-24",20)
+        c+=profit
+        file.write(str(profit)+"\n"+str(popu[0])+"\n")
 
 
-    print(a)
+    print(c)
 
 """    for i in range(len(popu)):
         print("%f" % calculateFitness(popu[i]))
