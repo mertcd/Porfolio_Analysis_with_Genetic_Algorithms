@@ -48,10 +48,11 @@ def stc_and_ma(stck, start, end):  # This function calculates "Moving Average" a
 def calculateGoldenCross(stock, seasonalMa, end, dates):
     weeklyMa = stc_and_ma(stock, dates[dates.index(end) - 7], end)[1]
 
-    return weeklyMa - seasonalMa
+    return weeklyMa - seasonalMa #If short term moving average cross the long term moving average golden cross occurs
 
 
-def setParameters(stck, end, dates):
+def setParameters(stck, end, dates):# Function for adding paramaterss to genome  So we dont need traverse all the
+    # list on fitness calculation
     stockArr = makeList(open("Stocks\\" + stck, "r"))
     stcWma = stc_and_ma(stockArr, dates[dates.index(end) - 30], end)
     ma = stcWma[1]
@@ -64,7 +65,7 @@ def setParameters(stck, end, dates):
     return [stck, goldenCross, stc,float(closingPrice)-float(monthBeforePrice)]
 
 
-def createPortfolio(stcks, length, end, dates):
+def createPortfolio(stcks, length, end, dates):# Creates the portfolio to be encoded as a genome or invidual in population
     ls = []
     while len(ls) < length:
         randomStock = stcks[random.randint(0, len(stcks) - 1)]
@@ -78,10 +79,10 @@ def createPopulation(stcks, portLength, length, end, dates):
     for i in range(length):
         ls.append(createPortfolio(stcks, portLength, end, dates))
 
-    return ls
+    return ls #Create the population of genomes.
 
 
-def calculateFitness(genome):
+def calculateFitness(genome):#Calculates fitness based on parameter that encoded into gene.
     maSum = 0
     stcSum = 0
     momentum = 0
@@ -91,7 +92,7 @@ def calculateFitness(genome):
         momentum+=gen[3]
     return  (stcSum/200+ maSum/ 5-momentum*10)*-1
 
-def crossOver(gen1 ,gen2):
+def crossOver(gen1 ,gen2):#Single point cross over.
     ch1 = gen1.copy()
     ch2 = gen2.copy()
 
@@ -103,7 +104,7 @@ def crossOver(gen1 ,gen2):
         ch2[i] = temp
     return [ch1, ch2]
 
-def mutation(gen ,end, dates):
+def mutation(gen ,end, dates):#Mutations are importent for not to be premature.
     por = gen.copy()
 
     mutationPoint = random.randint(0, 4)
@@ -111,7 +112,7 @@ def mutation(gen ,end, dates):
     randomStock = stcks[random.randint(0, len(stcks) - 1)]
     por[mutationPoint] =setParameters(randomStock, end, dates)
     return por
-def sortPopulation(population):
+def sortPopulation(population): #Sorts the population using selection sort.
     popu = population.copy()
     for i in range(len(popu)):
 
@@ -124,7 +125,7 @@ def sortPopulation(population):
 
         popu[i], popu[min_idx] = popu[min_idx], popu[i]
     return popu
-def income(port,end,days):
+def income(port,end,days): #Calculates income to test the fitness values .
     for i in port:
         stockArr = makeList(open("Stocks\\" + i[0], "r"))
         date = makeDates(stockArr)
@@ -144,19 +145,19 @@ if __name__ == '__main__':
     stocknames = os.listdir("Stocks")
 
 
-
+    #creates population of portfolios encoded as genome.
     popu = createPopulation(stocknames, 5,20, "2017-04-24", dateList)
 
     co = 0
 
     fitnessValues = []
     proValues = []
-    while co < 30:
+    while co < 30: #Make 30 iteration
         co+=1
         popu = sortPopulation(popu)
-        popu= popu[:20]
+        popu= popu[:20]#20 best ones to survive next generation
         fitnessValues.append(calculateFitness(popu[0]))
-        for i in range(20):
+        for i in range(20):#create 20 new individual
             newBorn1 =crossOver(popu[-1],popu[-2])[0]
 
             a = random.randint(0,10)
