@@ -2,22 +2,22 @@ import os
 import matplotlib.pyplot as plt
 import random
 
-
-def makeDates(file):  # Just a function to save dates to an array. Necessary because we dont want to input holidays.
+# Just a function to save dates to an array. Necessary because we dont want to input holidays.
+def makeDates(file):  
     dates = []
     for i in file:
         dates.append(i[:10])
     return dates
 
-
-def makeList(file):  # After opening the file it adds all information to an array. We dont want to read all from disk
+ # After opening the file it adds all information to an array. We dont want to read all from disk
+def makeList(file): 
     lsi = []
     for line in file:
         lsi.append(line)
     return lsi
 
-
-def stc_and_ma(stck, start, end):  # This function calculates "Moving Average" and "Stohastic Oscilator".
+# This function calculates "Moving Average" and "Stohastic Oscilator".
+def stc_and_ma(stck, start, end):  
     sum = 0
     co = 0
     low = 99999
@@ -32,7 +32,8 @@ def stc_and_ma(stck, start, end):  # This function calculates "Moving Average" a
             ls = line.split(",")
             sum += float(ls[1])
             co += 1
-            if co > 15:#upper part saves 30 days prices and lover part calculates for stc
+            #upper part saves 30 days prices and lover part calculates for stc
+            if co > 15:
                 lowPrice = float(ls[3])
                 highPriceDaily = float(ls[2])
                 if lowPrice < low: low = lowPrice
@@ -47,11 +48,11 @@ def stc_and_ma(stck, start, end):  # This function calculates "Moving Average" a
 
 def calculateGoldenCross(stock, seasonalMa, end, dates):
     weeklyMa = stc_and_ma(stock, dates[dates.index(end) - 7], end)[1]
+    #If short term moving average cross the long term moving average golden cross occurs
+    return weeklyMa - seasonalMa 
 
-    return weeklyMa - seasonalMa #If short term moving average cross the long term moving average golden cross occurs
-
-
-def setParameters(stck, end, dates):# Function for adding paramaterss to genome  So we dont need traverse all the
+# Function for adding paramaterss to genome  So we dont need traverse all the
+def setParameters(stck, end, dates):
     # list on fitness calculation
     stockArr = makeList(open("Stocks\\" + stck, "r"))
     stcWma = stc_and_ma(stockArr, dates[dates.index(end) - 30], end)
@@ -64,8 +65,8 @@ def setParameters(stck, end, dates):# Function for adding paramaterss to genome 
 
     return [stck, goldenCross, stc,float(closingPrice)-float(monthBeforePrice)]
 
-
-def createPortfolio(stcks, length, end, dates):# Creates the portfolio to be encoded as a genome or invidual in population
+# Creates the portfolio to be encoded as a genome or invidual in population
+def createPortfolio(stcks, length, end, dates):
     ls = []
     while len(ls) < length:
         randomStock = stcks[random.randint(0, len(stcks) - 1)]
@@ -81,8 +82,8 @@ def createPopulation(stcks, portLength, length, end, dates):
 
     return ls #Create the population of genomes.
 
-
-def calculateFitness(genome):#Calculates fitness based on parameter that encoded into gene.
+#Calculates fitness based on parameter that encoded into gene.
+def calculateFitness(genome):
     maSum = 0
     stcSum = 0
     momentum = 0
@@ -91,8 +92,8 @@ def calculateFitness(genome):#Calculates fitness based on parameter that encoded
         stcSum += gen[2]
         momentum+=gen[3]
     return  (stcSum/200+ maSum/ 5-momentum*10)*-1
-
-def crossOver(gen1 ,gen2):#Single point cross over.
+#Single point cross over.
+def crossOver(gen1 ,gen2):
     ch1 = gen1.copy()
     ch2 = gen2.copy()
 
@@ -103,8 +104,8 @@ def crossOver(gen1 ,gen2):#Single point cross over.
         ch1[i] = ch2[i]
         ch2[i] = temp
     return [ch1, ch2]
-
-def mutation(gen ,end, dates):#Mutations are importent for not to be premature.
+#Mutations are importent for not to be premature.
+def mutation(gen ,end, dates):
     por = gen.copy()
 
     mutationPoint = random.randint(0, 4)
@@ -112,7 +113,8 @@ def mutation(gen ,end, dates):#Mutations are importent for not to be premature.
     randomStock = stcks[random.randint(0, len(stcks) - 1)]
     por[mutationPoint] =setParameters(randomStock, end, dates)
     return por
-def sortPopulation(population): #Sorts the population using selection sort.
+#Sorts the population using selection sort.
+def sortPopulation(population): 
     popu = population.copy()
     for i in range(len(popu)):
 
@@ -125,7 +127,8 @@ def sortPopulation(population): #Sorts the population using selection sort.
 
         popu[i], popu[min_idx] = popu[min_idx], popu[i]
     return popu
-def income(port,end,days): #Calculates income to test the fitness values .
+#Calculates income to test the fitness values .
+def income(port,end,days): 
     for i in port:
         stockArr = makeList(open("Stocks\\" + i[0], "r"))
         date = makeDates(stockArr)
@@ -155,7 +158,8 @@ if __name__ == '__main__':
     while co < 30: #Make 30 iteration
         co+=1
         popu = sortPopulation(popu)
-        popu= popu[:20]#20 best ones to survive next generation
+        #20 best ones to survive next generation
+        popu= popu[:20]
         fitnessValues.append(calculateFitness(popu[0]))
         for i in range(20):#create 20 new individual
             newBorn1 =crossOver(popu[-1],popu[-2])[0]
